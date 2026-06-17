@@ -4,11 +4,19 @@
 
 :root {
   --background: #fafafc;
-  --foreground: #16162e;
+  --foreground: #1a1a1a;
 
-  --primary: #5b3fd6;
-  --primary-hover: #4b2cc9;
+  --card: #ffffff;
+  --border: #e8eaf0;
+
+  --brand: #5b3fd6;
+  --brand-hover: #4b32bd;
+  --brand-light: #f5f3ff;
+  --brand-border: #c9bfff;
+
   --primary-dark: #1c1e5a;
+  --muted: #6b7280;
+  --input-border: #e2e5ee;
 
   --card: #ffffff;
   --border: #e8eaf0;

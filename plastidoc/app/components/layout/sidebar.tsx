@@ -1,20 +1,11 @@
 import Link from "next/link";
 import { FileText, History, Settings, Users, LayoutDashboard } from "lucide-react";
+import { Logo } from "../logo";
 
 export function Sidebar() {
   return (
     <aside className="min-h-screen w-72 bg-[var(--primary-dark)] p-6 text-white">
-      <div className="mb-10 flex items-center gap-3">
-        <div className="flex h-11 w-11 items-center justify-center rounded-xl bg-[var(--brand)] text-xl">
-          ♧
-        </div>
-
-        <div>
-          <h1 className="text-lg font-bold">PlastiDoc</h1>
-          <p className="text-xs text-white/60">Painel médico</p>
-        </div>
-      </div>
-
+      <Logo />
       <nav className="space-y-2">
         <Link href="/dashboard" className="flex items-center gap-3 rounded-xl bg-white/10 px-4 py-3 text-sm">
           <LayoutDashboard size={18} />
