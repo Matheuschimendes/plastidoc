@@ -1,3 +1,7 @@
+import { Button } from "@/app/components/ui/button";
+import { Input } from "@/app/components/ui/input";
+import { Label } from "@/app/components/ui/label";
+
 export default function LoginPage() {
   return (
     <main className="flex min-h-screen items-center justify-center bg-[var(--background)] p-6">
@@ -36,22 +40,22 @@ export default function LoginPage() {
 
             <form className="space-y-5">
               <div>
-                <label className="mb-2 block text-sm font-semibold text-[var(--foreground)]">
+                <Label className="mb-2 block text-sm font-semibold text-[var(--foreground)]">
                   E-mail
-                </label>
+                </Label>
 
-                <input
+                <Input
                   type="email"
                   placeholder="seu@email.com"
-                  className="h-12 w-full rounded-xl border border-[var(--input-border)] px-4 text-sm outline-none transition focus:border-[var(--brand)]"
+                  className="h-12 rounded-xl border-[var(--input-border)] px-4 text-sm focus-visible:ring-0 focus-visible:border-[var(--brand)]"
                 />
               </div>
 
               <div>
                 <div className="mb-2 flex items-center justify-between">
-                  <label className="text-sm font-semibold text-[var(--foreground)]">
+                  <Label className="text-sm font-semibold text-[var(--foreground)]">
                     Senha
-                  </label>
+                  </Label>
 
                   <a
                     href="#"
@@ -61,19 +65,19 @@ export default function LoginPage() {
                   </a>
                 </div>
 
-                <input
+                <Input
                   type="password"
                   placeholder="********"
-                  className="h-12 w-full rounded-xl border border-[var(--input-border)] px-4 text-sm outline-none transition focus:border-[var(--brand)]"
+                  className="h-12 rounded-xl border-[var(--input-border)] px-4 text-sm focus-visible:ring-0 focus-visible:border-[var(--brand)]"
                 />
               </div>
 
-              <button
+              <Button
                 type="button"
                 className="h-12 w-full rounded-xl bg-[var(--brand)] font-semibold text-white shadow-sm transition hover:bg-[var(--brand-hover)]"
               >
                 Entrar
-              </button>
+              </Button>
 
               <div className="flex items-center gap-4">
                 <div className="h-px flex-1 bg-[var(--border)]" />
@@ -81,12 +85,13 @@ export default function LoginPage() {
                 <div className="h-px flex-1 bg-[var(--border)]" />
               </div>
 
-              <button
+              <Button
                 type="button"
-                className="h-12 w-full rounded-xl border border-[var(--brand-border)] font-semibold text-[var(--brand)] transition hover:bg-[var(--brand-light)]"
+                variant="outline"
+                className="h-12 w-full rounded-xl border-[var(--brand-border)] font-semibold text-[var(--brand)] transition hover:bg-[var(--brand-light)]"
               >
                 Entrar com 2FA
-              </button>
+              </Button>
             </form>
 
             <p className="mt-10 text-center text-sm leading-relaxed text-[var(--muted)]">
