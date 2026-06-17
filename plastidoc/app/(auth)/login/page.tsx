@@ -90,7 +90,7 @@ export default function LoginPage() {
                 variant="outline"
                 className="h-12 w-full rounded-xl border-[var(--brand-border)] font-semibold text-[var(--brand)] transition hover:bg-[var(--brand-light)]"
               >
-                Entrar com 2FA
+                Entrar com 2FAs
               </Button>
             </form>
 
