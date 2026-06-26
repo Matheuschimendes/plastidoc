@@ -1,6 +1,5 @@
 @import "tailwindcss";
 @import "tw-animate-css";
-@import "shadcn/tailwind.css";
 
 :root {
   --background: #fafafc;
@@ -14,13 +13,12 @@
   --brand-light: #f5f3ff;
   --brand-border: #c9bfff;
 
+  --primary: #5b3fd6;
+  --primary-hover: #4b32bd;
   --primary-dark: #1c1e5a;
+
   --muted: #6b7280;
   --input-border: #e2e5ee;
-
-  --card: #ffffff;
-  --border: #e8eaf0;
-  --muted: #6b7280;
 
   --success: #22c55e;
   --warning: #f59e0b;
@@ -43,6 +41,11 @@
   --color-primary: var(--primary);
   --color-primary-hover: var(--primary-hover);
   --color-primary-dark: var(--primary-dark);
+
+  --color-brand: var(--brand);
+  --color-brand-hover: var(--brand-hover);
+  --color-brand-light: var(--brand-light);
+  --color-brand-border: var(--brand-border);
 
   --color-card: var(--card);
   --color-border: var(--border);
