@@ -1,7 +1,8 @@
 "use client";
 
 import { useMemo, useState } from "react";
-import { ArrowLeft, ArrowRight, Clipboard, Copy, Save } from "lucide-react";
+import { ArrowLeft, ArrowRight, Copy, Save } from "lucide-react";
+import { toast } from "sonner";
 
 import { Button } from "@/app/components/ui/button";
 import { Card, CardContent } from "@/app/components/ui/card";
@@ -127,7 +128,6 @@ export function NovaDescricaoWizard() {
   const [selectedClosure, setSelectedClosure] = useState("");
   const [selectedDressing, setSelectedDressing] = useState("");
   const [observations, setObservations] = useState("");
-  const [copied, setCopied] = useState(false);
 
   const selectedSurgeryText =
     surgeryOptions.find((item) => item.id === selectedSurgery)?.text ?? "";
@@ -180,7 +180,13 @@ export function NovaDescricaoWizard() {
     step === 7;
 
   function nextStep() {
-    if (!canGoNext) return;
+    if (!canGoNext) {
+      toast.error("Seleção obrigatória", {
+        description: "Escolha uma opção antes de continuar.",
+      });
+
+      return;
+    }
 
     if (step < steps.length - 1) {
       setStep((current) => current + 1);
@@ -197,17 +203,42 @@ export function NovaDescricaoWizard() {
     if (!preview) return;
 
     await navigator.clipboard.writeText(preview);
-    setCopied(true);
 
-    setTimeout(() => {
-      setCopied(false);
-    }, 2000);
+    toast.success("Texto copiado", {
+      description: "A descrição foi copiada para a área de transferência.",
+    });
+  }
+
+  function handleSave(status: "Rascunho" | "Finalizada") {
+    const generatedDescription = {
+      id: crypto.randomUUID(),
+      doctorId: "doctor-demo-id",
+      doctorName: "Dr. Gabriel",
+      status,
+      surgeryId: selectedSurgery,
+      content: preview,
+      createdAt: new Date().toISOString(),
+    };
+
+    console.log("Descrição gerada:", generatedDescription);
+
+    if (status === "Rascunho") {
+      toast.success("Rascunho salvo", {
+        description: "Você poderá continuar esta descrição posteriormente.",
+      });
+
+      return;
+    }
+
+    toast.success("Descrição finalizada", {
+      description: "A descrição foi gerada com sucesso.",
+    });
   }
 
   function renderOptionList(
     options: Option[],
     selected: string,
-    onSelect: (value: string) => void
+    onSelect: (value: string) => void,
   ) {
     return (
       <div className="space-y-3">
@@ -302,35 +333,35 @@ export function NovaDescricaoWizard() {
                   renderOptionList(
                     techniqueOptions,
                     selectedTechnique,
-                    setSelectedTechnique
+                    setSelectedTechnique,
                   )}
 
                 {step === 3 &&
                   renderOptionList(
                     solutionOptions,
                     selectedSolution,
-                    setSelectedSolution
+                    setSelectedSolution,
                   )}
 
                 {step === 4 &&
                   renderOptionList(
                     materialOptions,
                     selectedMaterial,
-                    setSelectedMaterial
+                    setSelectedMaterial,
                   )}
 
                 {step === 5 &&
                   renderOptionList(
                     closureOptions,
                     selectedClosure,
-                    setSelectedClosure
+                    setSelectedClosure,
                   )}
 
                 {step === 6 &&
                   renderOptionList(
                     dressingOptions,
                     selectedDressing,
-                    setSelectedDressing
+                    setSelectedDressing,
                   )}
 
                 {step === 7 && (
@@ -371,8 +402,8 @@ export function NovaDescricaoWizard() {
                 disabled={!preview}
                 className="mt-6 w-full rounded-xl border-[var(--brand-border)] text-[var(--brand)]"
               >
-                <Copy size={16} />
-                {copied ? "Texto copiado" : "Copiar texto"}
+                <Copy size={16} className="mr-2" />
+                Copiar descrição
               </Button>
             </CardContent>
           </Card>
@@ -387,7 +418,7 @@ export function NovaDescricaoWizard() {
           disabled={step === 0}
           className="rounded-xl"
         >
-          <ArrowLeft size={16} />
+          <ArrowLeft size={16} className="mr-2" />
           Voltar
         </Button>
 
@@ -399,16 +430,30 @@ export function NovaDescricaoWizard() {
             className="rounded-xl bg-[var(--brand)] px-8 hover:bg-[var(--brand-hover)]"
           >
             Próximo
-            <ArrowRight size={16} />
+            <ArrowRight size={16} className="ml-2" />
           </Button>
         ) : (
-          <Button
-            type="button"
-            className="rounded-xl bg-[var(--brand)] px-8 hover:bg-[var(--brand-hover)]"
-          >
-            <Save size={16} />
-            Salvar descrição
-          </Button>
+          <div className="flex flex-col gap-3 md:flex-row">
+            <Button
+              type="button"
+              variant="outline"
+              onClick={() => handleSave("Rascunho")}
+              disabled={!preview}
+              className="rounded-xl border-[var(--brand-border)] text-[var(--brand)]"
+            >
+              <Save size={16} className="mr-2" />
+              Salvar rascunho
+            </Button>
+
+            <Button
+              type="button"
+              onClick={() => handleSave("Finalizada")}
+              disabled={!preview}
+              className="rounded-xl bg-[var(--brand)] px-8 hover:bg-[var(--brand-hover)]"
+            >
+              Finalizar descrição
+            </Button>
+          </div>
         )}
       </div>
     </section>
