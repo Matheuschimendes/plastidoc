@@ -1,5 +1,8 @@
-import { Sidebar } from "../components/layout/sidebar";
+// app/(private)/layout.tsx
+
+import { DescriptionProvider } from "@/app/providers/DescriptionProvider";
 import { Header } from "../components/layout/header";
+import { Sidebar } from "../components/layout/sidebar";
 
 export default function PrivateLayout({
   children,
@@ -7,16 +10,18 @@ export default function PrivateLayout({
   children: React.ReactNode;
 }) {
   return (
-    <main className="flex min-h-screen bg-[var(--background)]">
-      <Sidebar />
+    <DescriptionProvider>
+      <div className="flex min-h-screen bg-[var(--background)]">
+        <Sidebar />
 
-      <section className="flex min-h-screen flex-1 flex-col">
-        <Header />
+        <div className="flex min-w-0 flex-1 flex-col">
+          <Header />
 
-        <div className="flex-1 p-8">
-          {children}
+          <main className="flex-1 p-8">
+            {children}
+          </main>
         </div>
-      </section>
-    </main>
+      </div>
+    </DescriptionProvider>
   );
 }
