@@ -1,13 +1,15 @@
 "use client";
 
 import { useMemo, useState } from "react";
-import { ArrowLeft, ArrowRight, Clipboard, Copy, Save } from "lucide-react";
+import { ArrowLeft, ArrowRight, Copy, Save } from "lucide-react";
+import { toast } from "sonner";
 
 import { Button } from "@/app/components/ui/button";
 import { Card, CardContent } from "@/app/components/ui/card";
 import { Textarea } from "@/app/components/ui/textarea";
 import { Stepper } from "@/app/components/wizard/Stepper";
 import { SurgeryCard } from "@/app/components/surgery/SurgeryCard";
+import { useDescription } from "@/app/providers/DescriptionProvider";
 import { surgeryOptions } from "@/lib/surgeries";
 
 const steps = [
@@ -21,7 +23,13 @@ const steps = [
   "Revisão",
 ];
 
-const techniqueOptions = [
+type Option = {
+  id: string;
+  label: string;
+  text: string;
+};
+
+const techniqueOptions: Option[] = [
   {
     id: "subglandular",
     label: "Plano subglandular",
@@ -39,7 +47,7 @@ const techniqueOptions = [
   },
 ];
 
-const solutionOptions = [
+const solutionOptions: Option[] = [
   {
     id: "antisseptica",
     label: "Solução antisséptica",
@@ -57,7 +65,7 @@ const solutionOptions = [
   },
 ];
 
-const materialOptions = [
+const materialOptions: Option[] = [
   {
     id: "protese",
     label: "Prótese de silicone",
@@ -75,7 +83,7 @@ const materialOptions = [
   },
 ];
 
-const closureOptions = [
+const closureOptions: Option[] = [
   {
     id: "camadas",
     label: "Fechamento em camadas",
@@ -93,7 +101,7 @@ const closureOptions = [
   },
 ];
 
-const dressingOptions = [
+const dressingOptions: Option[] = [
   {
     id: "micropore",
     label: "Micropore",
@@ -111,23 +119,25 @@ const dressingOptions = [
   },
 ];
 
-type Option = {
-  id: string;
-  label: string;
-  text: string;
-};
-
 export function NovaDescricaoWizard() {
   const [step, setStep] = useState(0);
 
-  const [selectedSurgery, setSelectedSurgery] = useState("");
-  const [selectedTechnique, setSelectedTechnique] = useState("");
-  const [selectedSolution, setSelectedSolution] = useState("");
-  const [selectedMaterial, setSelectedMaterial] = useState("");
-  const [selectedClosure, setSelectedClosure] = useState("");
-  const [selectedDressing, setSelectedDressing] = useState("");
-  const [observations, setObservations] = useState("");
-  const [copied, setCopied] = useState(false);
+  const {
+    data,
+    updateField,
+    generateDescription,
+    createDescriptionPayload,
+  } = useDescription();
+
+  const {
+    selectedSurgery,
+    selectedTechnique,
+    selectedSolution,
+    selectedMaterial,
+    selectedClosure,
+    selectedDressing,
+    observations,
+  } = data;
 
   const selectedSurgeryText =
     surgeryOptions.find((item) => item.id === selectedSurgery)?.text ?? "";
@@ -148,7 +158,7 @@ export function NovaDescricaoWizard() {
     dressingOptions.find((item) => item.id === selectedDressing)?.text ?? "";
 
   const preview = useMemo(() => {
-    return [
+    return generateDescription([
       selectedSurgeryText,
       selectedTechniqueText,
       selectedSolutionText,
@@ -156,10 +166,9 @@ export function NovaDescricaoWizard() {
       selectedClosureText,
       selectedDressingText,
       observations,
-    ]
-      .filter(Boolean)
-      .join("\n\n");
+    ]);
   }, [
+    generateDescription,
     selectedSurgeryText,
     selectedTechniqueText,
     selectedSolutionText,
@@ -180,7 +189,13 @@ export function NovaDescricaoWizard() {
     step === 7;
 
   function nextStep() {
-    if (!canGoNext) return;
+    if (!canGoNext) {
+      toast.error("Seleção obrigatória", {
+        description: "Escolha uma opção antes de continuar.",
+      });
+
+      return;
+    }
 
     if (step < steps.length - 1) {
       setStep((current) => current + 1);
@@ -197,17 +212,34 @@ export function NovaDescricaoWizard() {
     if (!preview) return;
 
     await navigator.clipboard.writeText(preview);
-    setCopied(true);
 
-    setTimeout(() => {
-      setCopied(false);
-    }, 2000);
+    toast.success("Texto copiado", {
+      description: "A descrição foi copiada para a área de transferência.",
+    });
+  }
+
+  function handleSave(status: "Rascunho" | "Finalizada") {
+    const generatedDescription = createDescriptionPayload(status, preview);
+
+    console.log("Descrição gerada:", generatedDescription);
+
+    if (status === "Rascunho") {
+      toast.success("Rascunho salvo", {
+        description: "Você poderá continuar esta descrição posteriormente.",
+      });
+
+      return;
+    }
+
+    toast.success("Descrição finalizada", {
+      description: "A descrição foi gerada com sucesso.",
+    });
   }
 
   function renderOptionList(
     options: Option[],
     selected: string,
-    onSelect: (value: string) => void
+    onSelect: (value: string) => void,
   ) {
     return (
       <div className="space-y-3">
@@ -276,7 +308,7 @@ export function NovaDescricaoWizard() {
                 label={item.label}
                 icon={item.icon}
                 active={selectedSurgery === item.id}
-                onClick={() => setSelectedSurgery(item.id)}
+                onClick={() => updateField("selectedSurgery", item.id)}
               />
             ))}
           </div>
@@ -302,35 +334,27 @@ export function NovaDescricaoWizard() {
                   renderOptionList(
                     techniqueOptions,
                     selectedTechnique,
-                    setSelectedTechnique
+                    (value) => updateField("selectedTechnique", value),
                   )}
 
                 {step === 3 &&
-                  renderOptionList(
-                    solutionOptions,
-                    selectedSolution,
-                    setSelectedSolution
+                  renderOptionList(solutionOptions, selectedSolution, (value) =>
+                    updateField("selectedSolution", value),
                   )}
 
                 {step === 4 &&
-                  renderOptionList(
-                    materialOptions,
-                    selectedMaterial,
-                    setSelectedMaterial
+                  renderOptionList(materialOptions, selectedMaterial, (value) =>
+                    updateField("selectedMaterial", value),
                   )}
 
                 {step === 5 &&
-                  renderOptionList(
-                    closureOptions,
-                    selectedClosure,
-                    setSelectedClosure
+                  renderOptionList(closureOptions, selectedClosure, (value) =>
+                    updateField("selectedClosure", value),
                   )}
 
                 {step === 6 &&
-                  renderOptionList(
-                    dressingOptions,
-                    selectedDressing,
-                    setSelectedDressing
+                  renderOptionList(dressingOptions, selectedDressing, (value) =>
+                    updateField("selectedDressing", value),
                   )}
 
                 {step === 7 && (
@@ -338,7 +362,9 @@ export function NovaDescricaoWizard() {
                     <Textarea
                       placeholder="Adicione observações finais, se necessário..."
                       value={observations}
-                      onChange={(event) => setObservations(event.target.value)}
+                      onChange={(event) =>
+                        updateField("observations", event.target.value)
+                      }
                       className="min-h-32 rounded-2xl border-[var(--border)]"
                     />
 
@@ -371,8 +397,8 @@ export function NovaDescricaoWizard() {
                 disabled={!preview}
                 className="mt-6 w-full rounded-xl border-[var(--brand-border)] text-[var(--brand)]"
               >
-                <Copy size={16} />
-                {copied ? "Texto copiado" : "Copiar texto"}
+                <Copy size={16} className="mr-2" />
+                Copiar descrição
               </Button>
             </CardContent>
           </Card>
@@ -387,7 +413,7 @@ export function NovaDescricaoWizard() {
           disabled={step === 0}
           className="rounded-xl"
         >
-          <ArrowLeft size={16} />
+          <ArrowLeft size={16} className="mr-2" />
           Voltar
         </Button>
 
@@ -396,19 +422,33 @@ export function NovaDescricaoWizard() {
             type="button"
             onClick={nextStep}
             disabled={!canGoNext}
-            className="rounded-xl bg-[var(--brand)] px-8 hover:bg-[var(--brand-hover)]"
+            className="rounded-xl bg-[var(--brand)] px-8 text-white hover:bg-[var(--brand-hover)]"
           >
             Próximo
-            <ArrowRight size={16} />
+            <ArrowRight size={16} className="ml-2" />
           </Button>
         ) : (
-          <Button
-            type="button"
-            className="rounded-xl bg-[var(--brand)] px-8 hover:bg-[var(--brand-hover)]"
-          >
-            <Save size={16} />
-            Salvar descrição
-          </Button>
+          <div className="flex flex-col gap-3 md:flex-row">
+            <Button
+              type="button"
+              variant="outline"
+              onClick={() => handleSave("Rascunho")}
+              disabled={!preview}
+              className="rounded-xl border-[var(--brand-border)] text-[var(--brand)]"
+            >
+              <Save size={16} className="mr-2" />
+              Salvar rascunho
+            </Button>
+
+            <Button
+              type="button"
+              onClick={() => handleSave("Finalizada")}
+              disabled={!preview}
+              className="rounded-xl bg-[var(--brand)] px-8 text-white hover:bg-[var(--brand-hover)]"
+            >
+              Finalizar descrição
+            </Button>
+          </div>
         )}
       </div>
     </section>
